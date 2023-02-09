@@ -46,7 +46,7 @@ car["year"] = 2020
 print(x) #after the change 
 
 # get items
-x = thisdict.items
+x = thisdict.items()
 print(x)
 
 # check if key exists

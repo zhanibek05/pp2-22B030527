@@ -1,11 +1,16 @@
+def is_it_prime(x):
+    for i in range(2, x - 1):
+        if x%i == 0:
+            return False
+    return True
+
 def filter_prime(numbers):
+    primes = []
     for x in numbers:
-        y = int(x)
-        for i in range(2,y):
-            if y%i == 0:
-                numbers.remove(x)
-                break
-    return numbers
+        if is_it_prime(int(x)):
+            primes.append(x)
+    return primes
+        
 
 
 numbers = input().split()

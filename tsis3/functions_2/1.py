@@ -1,6 +1,6 @@
 # Dictionary of movies
 
-movies = [
+Movies = [
 {
 "name": "Usual Suspects", 
 "imdb": 7.0,
@@ -78,18 +78,49 @@ movies = [
 }
 ]
 
-def is_above_threshold(movie):
-    return movie['imdb'] > 5.5
-def get_movies_above_threshold(movies):
-    return [movie for movie in movies if is_above_threshold(movie)]
-def get_movies_by_category(movies, category):
-    return [movie for movie in movies if movie['category'] == category]
-def average_imdb_score(movies):
-    total_imdb_score = sum(movie['imdb'] for movie in movies)
-    return total_imdb_score / len(movies)
-def average_category_imdb_score(movies, category):
-    movies_in_category = get_movies_by_category(movies, category)
-    return average_imdb_score(movies_in_category)
+#1
+def goodMovie(movie):
+    for mov in Movies:
+        if mov["name"] == movie and mov["imdb"] > 5.5:
+            return True
+    return False
+print(goodMovie("Exam"))
+            
 
 
 
+#2
+def goodMovies(movies):
+    sublist = []
+    for movie in movies:
+        if goodMovie(movie):
+            sublist.append(movie["name"])
+    return sublist
+#print(goodMovies(movies))
+
+
+#3
+def Category(categ):
+    sublist = []
+    for movie in Movies:
+        if movie["category"] == categ:
+            sublist.append(movie["name"])
+    return sublist
+#print(Category("Romance"))
+
+
+#4
+def averageIMDB(lstofmovies):
+    sum = 0
+    for mov in Movies:
+        if mov["name"] in lstofmovies:
+            sum = sum + mov["imdb"]
+    return sum/len(lstofmovies)
+mylist = ["Exam", "We Two"]
+#print(averageIMDB(mylist))
+
+#5
+def averageIMDBcateg(categ):
+    mylist = [mov["name"] for mov in Movies if mov["category"] == categ]
+    return averageIMDB(mylist)
+#print(averageIMDBcateg("Romance"))

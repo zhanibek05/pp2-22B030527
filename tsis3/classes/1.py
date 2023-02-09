@@ -1,10 +1,14 @@
 class MyString():
     def __init__(self):
         self.str = ""
-    
+        
     def getString(self):
         self.str = input()
 
     def printString(self):
-        print(self.str.upper)
+        print(self.str.upper())
+        
 
+a = MyString()
+a.getString()
+a.printString()
