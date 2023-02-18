@@ -87,7 +87,7 @@ def goodMovie(movie):
 print(goodMovie("Exam"))
             
 
-
+#4 - 6  
 
 #2
 def goodMovies(movies):
@@ -124,3 +124,11 @@ def averageIMDBcateg(categ):
     mylist = [mov["name"] for mov in Movies if mov["category"] == categ]
     return averageIMDB(mylist)
 #print(averageIMDBcateg("Romance"))
+
+
+def imdbdiap(Movies):
+    lst = []
+    for movie in Movies:
+        if movie["category"] == "Romance"  or movie["imdb"] > 4 and movie["imdb"] < 6:
+            lst.append(movie)
+    return lst
