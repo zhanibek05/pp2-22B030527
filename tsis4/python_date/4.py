@@ -1,6 +1,6 @@
 import datetime
 
-def delta_time_sec(t1, t2):
+def delta_time_sec(time1, time2):
     delta = abs(time1 - time2)
     return delta.total_seconds()
 
