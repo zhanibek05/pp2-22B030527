@@ -2,11 +2,8 @@ import re
 
 text = input()
 
-x = re.findall(r'[A-Z][a-z]*', text)
+x = re.findall(r'[a-z]*[A-Z][a-z]*', text)
 
-res = ""
+res = " ".join(x)
 
-for i in x:
-    res += i + " "
-    
 print(res)
