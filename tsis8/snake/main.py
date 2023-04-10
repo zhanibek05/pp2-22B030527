@@ -7,6 +7,8 @@ pygame.init()
 FPS = 60
 BLOCK_SIZE = 20
 BLOCK_NUMBER = 20
+SCORE = 0
+LEVEL = 1
 
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((BLOCK_SIZE*BLOCK_NUMBER, BLOCK_NUMBER*BLOCK_SIZE))
@@ -27,7 +29,7 @@ class Snake:
             if block == self.body[0]:
                 col = (6, 7, 4)
             else:
-                col = (45, 125, 53)
+                col = (45, 150, 53)
             pygame.draw.circle(surface=screen, color=col, center=(block.x * BLOCK_SIZE + BLOCK_SIZE/2, block.y * BLOCK_SIZE + BLOCK_SIZE/2), radius = BLOCK_SIZE/2, )
     
     def move_snake(self):

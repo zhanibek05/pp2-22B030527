@@ -1,10 +1,14 @@
-import pygame
+import pygame, math
 
 pygame.init()
 WIDTH, HEIGHT = 800, 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 BLACK = pygame.Color(0, 0, 0)
 WHITE = pygame.Color(255, 255, 255)
+
+SCREEN.fill((200, 200, 200))
+pygame.display.update()
+paint_screen = pygame.Surface((800, 820))
 
 
 class GameObject:
@@ -16,19 +20,19 @@ class GameObject:
 
 
 class Button:
-    def __init__(self):
-        self.rect = pygame.draw.rect(
-            SCREEN,
-            (0, 255, 0),
-            (WIDTH // 2 - 20, 20, 40, 40)
-        )
+    def __init__(self,x, y, path):
+        self.x = x
+        self.y = y
+        #self.rect = pygame.Rect((self.x, self.y, 20, 20))
+        self.image = pygame.transform.scale((pygame.image.load(path)), (20, 20))
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+        
+        
 
     def draw(self):
-        self.rect = pygame.draw.rect(
-            SCREEN,
-            (0, 255, 0),
-            (WIDTH // 2 - 20, 20, 40, 40)
-        )
+        #pygame.draw.rect(surface=SCREEN, color= (0, 0, 0), rect=self.rect)
+        SCREEN.blit(self.image, self.rect)
 
 
 class Pen(GameObject):
@@ -38,15 +42,16 @@ class Pen(GameObject):
     def draw(self):
         for idx, value in enumerate(self.points[:-1]):
             pygame.draw.line(
-                SCREEN,
+                paint_screen,
                 BLACK,
                 start_pos=value,  # self.points[idx]
                 end_pos=self.points[idx + 1],
+                width=2
             )
 
     def handle(self, mouse_pos):
         self.points.append(mouse_pos)
-
+   
 
 class Rectangle(GameObject):
     def __init__(self, start_pos):
@@ -61,7 +66,7 @@ class Rectangle(GameObject):
         end_pos_y = max(self.start_pos[1], self.end_pos[1])
 
         pygame.draw.rect(
-            SCREEN,
+            paint_screen,
             BLACK,
             (
                 start_pos_x,
@@ -75,29 +80,58 @@ class Rectangle(GameObject):
     def handle(self, mouse_pos):
         self.end_pos = mouse_pos
 
+class Circle(GameObject):
+    def __init__(self, start_pos):
+        self.center = start_pos #x, y
+        self.radius = 0 # r
+    def draw(self):
+        pygame.draw.circle(surface=paint_screen,
+                           color=(0, 0, 0),
+                           center=self.center,
+                           radius=self.radius,
+                           width=2)
+    def handle(self, mouse_pos):
+        a = self.center[0] - mouse_pos[0]
+        b = self.center[1] - mouse_pos[1]
+        self.radius = math.sqrt(a*a + b*b)
 
+class Eraser(GameObject):
+    pass
 def main():
     running = True
     clock = pygame.time.Clock()
     active_obj = None
-    button = Button()
+    pen_button = Button(10, 10, "images/pen.png")
+    rect_button = Button(50, 10, "images/rect.png")
+    circle_button = Button(90, 10, "images/circle.png")
+    eraser_button = Button(130, 10, "images/eraser.png")
 
     objects = [
-        button,
+        pen_button,
+        rect_button,
+        circle_button,
+        eraser_button
     ]
     # current_shape = 'pen'
     current_shape = Pen
-
+   
     while running:
-        SCREEN.fill(WHITE)
+        SCREEN.blit(paint_screen, (0, 20))
+        paint_screen.fill((255, 255, 255))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if button.rect.collidepoint(event.pos):
+                if rect_button.rect.collidepoint(event.pos):
                     current_shape = Rectangle
+                if pen_button.rect.collidepoint(event.pos):
+                    current_shape = Pen
+                if circle_button.rect.collidepoint(event.pos):
+                    current_shape = Circle
+                if eraser_button.rect.collidepoint(event.pos):
+                    pass
                 else:
                     active_obj = current_shape(start_pos=event.pos)
 
