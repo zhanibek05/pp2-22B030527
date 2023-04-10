@@ -1,14 +1,12 @@
 import pygame, math
 
 pygame.init()
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 800, 770
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 BLACK = pygame.Color(0, 0, 0)
 WHITE = pygame.Color(255, 255, 255)
 
-SCREEN.fill((200, 200, 200))
-pygame.display.update()
-paint_screen = pygame.Surface((800, 820))
+tool_screen = pygame.Surface((800, 30))
 
 
 class GameObject:
@@ -32,7 +30,7 @@ class Button:
 
     def draw(self):
         #pygame.draw.rect(surface=SCREEN, color= (0, 0, 0), rect=self.rect)
-        SCREEN.blit(self.image, self.rect)
+        tool_screen.blit(self.image, self.rect)
 
 
 class Pen(GameObject):
@@ -42,7 +40,7 @@ class Pen(GameObject):
     def draw(self):
         for idx, value in enumerate(self.points[:-1]):
             pygame.draw.line(
-                paint_screen,
+                SCREEN,
                 BLACK,
                 start_pos=value,  # self.points[idx]
                 end_pos=self.points[idx + 1],
@@ -66,7 +64,7 @@ class Rectangle(GameObject):
         end_pos_y = max(self.start_pos[1], self.end_pos[1])
 
         pygame.draw.rect(
-            paint_screen,
+            SCREEN,
             BLACK,
             (
                 start_pos_x,
@@ -85,7 +83,7 @@ class Circle(GameObject):
         self.center = start_pos #x, y
         self.radius = 0 # r
     def draw(self):
-        pygame.draw.circle(surface=paint_screen,
+        pygame.draw.circle(surface=SCREEN,
                            color=(0, 0, 0),
                            center=self.center,
                            radius=self.radius,
@@ -96,7 +94,18 @@ class Circle(GameObject):
         self.radius = math.sqrt(a*a + b*b)
 
 class Eraser(GameObject):
-    pass
+    def __init__(self, *args, **kwargs):
+        self.points = []  # [(x1, y1), (x2, y2)]
+
+    def draw(self):
+        for value in self.points:
+            pygame.draw.circle(SCREEN,
+                               WHITE,
+                               value,
+                               radius=50)
+
+    def handle(self, mouse_pos):
+        self.points.append(mouse_pos)
 def main():
     running = True
     clock = pygame.time.Clock()
@@ -116,8 +125,8 @@ def main():
     current_shape = Pen
    
     while running:
-        SCREEN.blit(paint_screen, (0, 20))
-        paint_screen.fill((255, 255, 255))
+        SCREEN.fill((WHITE))
+        tool_screen.fill((100, 100, 100))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -131,7 +140,7 @@ def main():
                 if circle_button.rect.collidepoint(event.pos):
                     current_shape = Circle
                 if eraser_button.rect.collidepoint(event.pos):
-                    pass
+                    current_shape = Eraser
                 else:
                     active_obj = current_shape(start_pos=event.pos)
 
@@ -145,6 +154,10 @@ def main():
 
         for obj in objects:
             obj.draw()
+            
+       
+        SCREEN.blit(tool_screen, (0, 0))
+        
 
         clock.tick(60)
         pygame.display.update()
