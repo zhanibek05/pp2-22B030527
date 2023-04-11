@@ -16,8 +16,9 @@ score_screen = pygame.Surface((BLOCK_SIZE*BLOCK_NUMBER, BLOCK_SIZE))
 #text
 font = pygame.font.SysFont("Verdana", 15)
 
-class Snake:
+class Snake():
     def __init__(self):
+        
         self.body = [Vector2(10, 10), Vector2(9, 10), Vector2(8, 10)]
         self.direction = Vector2(1, 0) #вектор направление
         
@@ -47,6 +48,7 @@ class Fruit:
     def __init__(self):
         self.randomize_pos()
     def draw_fruit(self):
+        
         fruit_rect = pygame.Rect(self.pos.x * BLOCK_SIZE, #что бы были ровно по сетке
                                  self.pos.y * BLOCK_SIZE, 
                                  BLOCK_SIZE, 
@@ -58,6 +60,27 @@ class Fruit:
         self.x = random.randint(0, BLOCK_NUMBER - 1)
         self.y = random.randint(1, BLOCK_NUMBER - 1)
         self.pos = Vector2(self.x, self.y)
+        
+class Big_fruit():
+    def __init__(self):
+        super().__init__(self)
+        self.randomize_pos()
+        self.is_time = False
+        self.rect = pygame.Rect(self.pos.x * BLOCK_SIZE, #что бы были ровно по сетке
+                                 self.pos.y * BLOCK_SIZE, 
+                                 2*BLOCK_SIZE, 
+                                 2*BLOCK_SIZE)
+    def draw_fruit(self):
+        
+        pygame.draw.rect(surface = screen
+                         ,color = (250, 2, 31), 
+                         rect = self.rect)
+    def randomize_pos(self):
+        self.x = random.randint(0, BLOCK_NUMBER - 1)
+        self.y = random.randint(1, BLOCK_NUMBER - 1)
+        self.pos = Vector2(self.x, self.y)
+    
+        
       
 class Main:
     def __init__(self):
@@ -71,16 +94,20 @@ class Main:
         self.check_fail()
         self.check_level()
     def draw_elements(self):
+
         if self.fruit.pos not in self.snake.body:
             self.fruit.draw_fruit()
         else:
             self.fruit.randomize_pos()
         self.snake.draw_snake()
+        
     def check_collision(self):
         if self.fruit.pos == self.snake.body[0]: # if collision
             self.fruit.randomize_pos()
             self.snake.add_block()
             self.score += 1
+        
+            
     def check_fail(self):
         head_pos = self.snake.body[0]
         if not 0 <= head_pos.x < BLOCK_NUMBER or not 1 <= head_pos.y < BLOCK_NUMBER: # hitting the wall
@@ -94,6 +121,7 @@ class Main:
             global SPEED
             SPEED -= 10
             pygame.time.set_timer(SCREEN_UPDATE, SPEED)
+   
             
     def game_over(self):
         pygame.quit()
@@ -103,6 +131,8 @@ class Main:
 main_game = Main()
 
 SCREEN_UPDATE = pygame.USEREVENT  + 1
+BIG_FRUIT = pygame.USEREVENT
+pygame.time.set_timer(BIG_FRUIT, 10000)
 pygame.time.set_timer(SCREEN_UPDATE, SPEED) # кастомное событье которая происходит раз в 150 мс
 
 while True:
@@ -113,6 +143,9 @@ while True:
             
         if event.type == SCREEN_UPDATE: #каждые 150 мс двигаем змею
             main_game.update()
+        
+        if event.type == BIG_FRUIT:
+            pass
             
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:

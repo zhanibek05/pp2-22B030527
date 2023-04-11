@@ -3,10 +3,11 @@ import pygame
 pygame.init()
 
 
-screen_width = 640
-screen_height = 480
+screen_width = 300
+screen_height = 300
 screen = pygame.display.set_mode((screen_width, screen_height))
-
+background = pygame.transform.scale(pygame.image.load("background.jpg"), (300, 300))
+screen.blit(background, (10, 10))
 pygame.display.set_caption("Music Player")
 
 clock = pygame.time.Clock()
@@ -63,7 +64,7 @@ while True:
                     i = len(album) - 1
                 playing(i)
    
-    screen.fill((255, 255, 255))
+    screen.blit(background, (0, 0))
     
 
     
