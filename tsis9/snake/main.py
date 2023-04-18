@@ -5,16 +5,26 @@ from pygame.math import Vector2
 pygame.init()
 
 FPS = 60
-BLOCK_SIZE = 20
-BLOCK_NUMBER = 20
+BLOCK_SIZE = 25
+BLOCK_NUMBER = 25
 SPEED = 200
 
 clock = pygame.time.Clock()
-screen = pygame.display.set_mode((BLOCK_SIZE*BLOCK_NUMBER, BLOCK_NUMBER*BLOCK_SIZE))
+screen = pygame.display.set_mode((BLOCK_SIZE*BLOCK_NUMBER, (BLOCK_NUMBER)*BLOCK_SIZE))
 score_screen = pygame.Surface((BLOCK_SIZE*BLOCK_NUMBER, BLOCK_SIZE))
 
 #text
-font = pygame.font.SysFont("Verdana", 15)
+font = pygame.font.SysFont("Verdana", 20)
+
+def Menu():
+    menu_screen = pygame.Surface((300, 300))
+    class Button():
+        def __init__(self, path):
+            self.image = pygame.transform.scale(pygame.image.load(path), (100, 50))
+    while True:
+        
+        screen.blit(menu_screen, (50, 50))
+        
 
 class Snake():
     def __init__(self):
@@ -24,17 +34,13 @@ class Snake():
         
     def draw_snake(self):
         for block in self.body:
-            #body_rect = pygame.Rect(block.x * BLOCK_SIZE, 
-                                    #block.y * BLOCK_SIZE, 
-                                    #BLOCK_SIZE, BLOCK_SIZE)
-            #pygame.draw.rect(screen, 
-                             #(45, 125, 53), 
-                             #body_rect, 5)
-            if block == self.body[0]:
-                col = (6, 7, 4)
-            else:
-                col = (45, 150, 53)
-            pygame.draw.circle(surface=screen, color=col, center=(block.x * BLOCK_SIZE + BLOCK_SIZE/2, block.y * BLOCK_SIZE + BLOCK_SIZE/2), radius = BLOCK_SIZE/2, )
+            body_rect = pygame.Rect(block.x * BLOCK_SIZE, 
+                                    block.y * BLOCK_SIZE, 
+                                    BLOCK_SIZE, BLOCK_SIZE)
+            pygame.draw.rect(screen, 
+                             (45, 125, 53), 
+                             body_rect, 5)
+           
     
     def move_snake(self):
         body_copy = self.body[:-1] #удаляем последний блок и копируем , в конец добавляем новый вектор + направление
@@ -135,41 +141,42 @@ BIG_FRUIT = pygame.USEREVENT
 pygame.time.set_timer(BIG_FRUIT, 10000)
 pygame.time.set_timer(SCREEN_UPDATE, SPEED) # кастомное событье которая происходит раз в 150 мс
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit
-            sys.exit()
+def game_loop():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit
+                sys.exit()
+                
+            if event.type == SCREEN_UPDATE: #каждые 150 мс двигаем змею
+                main_game.update()
             
-        if event.type == SCREEN_UPDATE: #каждые 150 мс двигаем змею
-            main_game.update()
-        
-        if event.type == BIG_FRUIT:
-            pass
+            if event.type == BIG_FRUIT:
+                pass
+                
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    if main_game.snake.direction != (0, 1):
+                        main_game.snake.direction = (0, -1) 
+                if event.key == pygame.K_DOWN:
+                    if main_game.snake.direction != (0, -1): 
+                        main_game.snake.direction = (0, 1)
+                if event.key == pygame.K_RIGHT:
+                    if main_game.snake.direction != (-1, 0):
+                        main_game.snake.direction = (1, 0)
+                if event.key == pygame.K_LEFT:
+                    if main_game.snake.direction != (1, 0):
+                        main_game.snake.direction = (-1, 0)
             
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                if main_game.snake.direction != (0, 1):
-                    main_game.snake.direction = (0, -1) 
-            if event.key == pygame.K_DOWN:
-                if main_game.snake.direction != (0, -1): 
-                    main_game.snake.direction = (0, 1)
-            if event.key == pygame.K_RIGHT:
-                if main_game.snake.direction != (-1, 0):
-                    main_game.snake.direction = (1, 0)
-            if event.key == pygame.K_LEFT:
-                if main_game.snake.direction != (1, 0):
-                    main_game.snake.direction = (-1, 0)
+        screen.fill((247, 214, 92))
+        score_screen.fill((100, 100, 250))
         
-    screen.fill((247, 214, 92))
-    score_screen.fill((100, 100, 250))
-    
-    scores = font.render("score:"+ str(main_game.score),True, (0, 0, 0))
-    levels = font.render("level:" + str(main_game.level), True, (0, 0, 0))
-    score_screen.blit(scores,(0, 0))
-    score_screen.blit(levels,(200, 0))
-    
-    screen.blit(score_screen, (0, 0))
-    main_game.draw_elements()
-    pygame.display.update()
-    clock.tick(FPS)
+        scores = font.render("Score:"+ str(main_game.score),True, (0, 0, 0))
+        levels = font.render("Level:" + str(main_game.level), True, (0, 0, 0))
+        score_screen.blit(scores,(0, 0))
+        score_screen.blit(levels,(200, 0))
+        
+        screen.blit(score_screen, (0, 0))
+        main_game.draw_elements()
+        pygame.display.update()
+        clock.tick(FPS)
