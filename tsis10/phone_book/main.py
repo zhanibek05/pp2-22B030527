@@ -1,4 +1,4 @@
-import psycopg2, csv
+import psycopg2, os
 from config import database, host, password, user
 running = True
 def main():
@@ -27,7 +27,7 @@ def main():
             )
         """)
         
-        command = input("Choose:\n        M - My contacts list\n        I - Insert New Contact\n        C(1|2) - Change Contact Name(1) or Number(2)\n        S(1|2) - Search Contact Name(1) or Number(2)\n        D(1|2) - Delete Contact Name(1) or Number(2)\n        0 - Quite program\n MY CHOICE: ")
+        command = input("Choose:\n        M - My contacts list\n        I - Insert New Contact\n        CSV - Upload data from CSV file\n        C(1|2) - Change Contact Name(1) or Number(2)\n        S(1|2) - Search Contact Name(1) or Number(2)\n        D(1|2) - Delete Contact Name(1) or Number(2)\n        0 - Quite program\n MY CHOICE: ")
         
         if command == 'M':
             cur.execute("""SELECT * FROM phone_book""")
@@ -37,9 +37,29 @@ def main():
         if command == 'I':
             sql = """INSERT INTO phone_book(contact_name, contact_number)
                      VALUES(%s,%s);"""
-
-            cur.execute(sql,(input("Enter Contact Name: \n"), input("Enter Contact Number: \n")))
-            print("Your Contact Saved Successfully!\n")
+            name = input("Enter Contact Name: \n")
+            number = input("Enter Contact Number: \n")
+            cur.execute(f"""SELECT EXISTS (SELECT * FROM phone_book WHERE contact_number = {number})""")
+            if not cur.fetchone()[0]:
+                cur.execute(sql,(name, number))
+                print("Your Contact Saved Successfully!\n")
+            else:
+                print("Such contact with same number already exists.")
+            
+        
+        if command == "CSV":
+            path = input("Enter full path to 'csv' file:")
+            if os.path.exists(f'{path}'):
+                cur.execute(f"""
+                            COPY phone_book(contact_name, contact_number)
+                            FROM '{path}'
+                            DELIMITER ','
+                            CSV HEADER
+                            """)
+                print("CSV file was successfully uploaded!\n")
+            else:
+                print("Incorrect path!")
+            
       
 
         # Update
@@ -103,7 +123,9 @@ def main():
 if __name__ == '__main__':
         while running:
             main()
-    
+        
+  
+   
    
 
        
