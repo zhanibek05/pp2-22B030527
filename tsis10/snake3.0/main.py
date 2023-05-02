@@ -30,7 +30,8 @@ cur.execute('''
         CREATE TABLE IF NOT EXISTS userscore(
             name TEXT NOT NULL,
             score INT,
-            level INT
+            level INT,
+            speed INT
         );
     ''')
 cur.execute('''
@@ -38,6 +39,15 @@ cur.execute('''
                 name TEXT NOT NULL,
                 score int, 
                 level int
+            )
+            
+            ''')
+
+cur.execute('''
+            CREATE TABLE IF NOT EXISTS position(
+                x REAL,
+                y REAL
+                 
             )
             
             ''')
@@ -59,8 +69,8 @@ class Snake:
                 color = head_color
             else:
                 color = (45, 125, 53)
-            body_rect = pygame.Rect(block.x * BLOCK_SIZE, 
-                                    block.y * BLOCK_SIZE, 
+            body_rect = pygame.Rect(block[0] * BLOCK_SIZE, 
+                                    block[1] * BLOCK_SIZE, 
                                     BLOCK_SIZE, BLOCK_SIZE)
             pygame.draw.rect(screen, 
                              color, 
@@ -98,6 +108,7 @@ class Main:
         self.fruit = Fruit()
         self.score = 0
         self.level = 1
+        self.speed = 200
     def update(self):
         self.snake.move_snake()
         self.check_collision()
@@ -128,9 +139,8 @@ class Main:
     def check_level(self):
         if self.score/5 == self.level:
             self.level += 1
-            global SPEED
-            SPEED -= 10
-            pygame.time.set_timer(SCREEN_UPDATE, SPEED)
+            main_game.speed -= 10
+            pygame.time.set_timer(SCREEN_UPDATE, main_game.speed)
             
     def game_over(self):
         font = pygame.font.SysFont("Verdana", 90)
@@ -141,7 +151,7 @@ class Main:
         game_over = font.render(f"Game Over!",True, (0, 0, 0))
         screen.blit(game_over, (60, 200))
         pygame.display.update()
-        pygame.time.delay(8000)
+        pygame.time.delay(5000)
        
         cur.execute(f'''
                     DELETE FROM userscore
@@ -161,6 +171,8 @@ class Main:
                     VALUES
                     ('{NAME}', {SCORE}, {LEVEL})
                     """)
+            
+        cur.execute("""DELETE FROM position""")
         cur.close()
         conn.close()
         pygame.quit()
@@ -171,7 +183,7 @@ class Main:
         text = font.render("PAUSE...Your results are saving...", True, (0, 0, 0))
         screen.blit(text,(47, 100))
         pygame.display.update()
-        pygame.time.delay(8000)
+        pygame.time.delay(5000)
         global SCORE, LEVEL
         SCORE = self.score
         LEVEL = self.level
@@ -180,14 +192,21 @@ class Main:
             cur.execute(f"""
                         UPDATE userscore
                         SET score = {SCORE},
-                            level = {LEVEL}
+                            level = {LEVEL},
+                            speed = {self.speed}
                         WHERE name = '{NAME}'
                         """)
         else:
             cur.execute(f"""INSERT INTO userscore
                     VALUES
-                    ('{NAME}', {SCORE}, {LEVEL})
+                    ('{NAME}', {SCORE}, {LEVEL}, {self.speed})
                     """)
+        for idx, body_block in enumerate(main_game.snake.body):
+            cur.execute(f"""INSERT INTO position
+                        VALUES
+                        ({body_block[0]},{body_block[0]})
+                        """)
+            
         cur.close()
         conn.close()
         pygame.quit()
@@ -243,11 +262,11 @@ def get_player_name():
         text1 = font.render("Snake Game!", True, (200, 0, 0))
         text2 = font.render("Enter your name:", True, (0, 0,0))
         cur.execute('''
-                    select * from records where score = (select MAX(score) from records)
-                             ''')
+                     select * from records where score = (select MAX(score) from records)
+                              ''')
         rec_name = cur.fetchone()[0]
         cur.execute('''
-                    select * from records where score = (select MAX(score) from records)
+                     select * from records where score = (select MAX(score) from records)
                              ''')
         rec_score = cur.fetchone()[1]
         
@@ -273,6 +292,14 @@ def main():
         main_game.score = cur.fetchone()[1]
         cur.execute(f"""SELECT * FROM userscore WHERE name = '{name}'""")
         main_game.level = cur.fetchone()[2]
+        cur.execute(f"""SELECT * FROM userscore WHERE name = '{name}'""")
+        main_game.speed = cur.fetchone()[3]
+        cur.execute('''SELECT * FROM position''')
+        snake_positions = cur.fetchall()
+        for snake_block in snake_positions:
+            main_game.snake.body.append(snake_block)
+    
+  
     
     while True:
         for event in pygame.event.get():
@@ -315,4 +342,3 @@ def main():
         
 if __name__ == '__main__':
     main()
-    
